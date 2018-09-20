@@ -1,6 +1,7 @@
 #!/bin/env bash
 
-# The TinyURL is:  https://preview [dot] tinyurl [dot] com/C7VMAutoDeploy
+# The TinyURL is:  https:// tinyurl [dot] com/C7VMAutoDeploy 
+# TinyURL preview is: https://preview [dot] tinyurl [dot] com/C7VMAutoDeploy
 # This script includes the commands from 'get_rh_version.sh', created by Jaydeehow (https://github.com/Jaydeehow/Bash)
 RH_BASED=false
 MAJOR_VERSION=0
