@@ -1,23 +1,22 @@
 #!/bin/env bash
 
+# This script includes the commands from 'get_rh_version.sh', created by Jaydeehow (https://github.com/Jaydeehow/Bash)
 RH_BASED=false
 MAJOR_VERSION=0
 CentMajor=0
 
 # Tests if there is an /etc/redhat-release file.
 # This applies to distributions based on Redhat, also.
-if [ -f /etc/redhat-release ]
-then
+if [ -f /etc/redhat-release ]; then
   RH_BASED=true
-fi
+fi # end of: if [ -f /etc/redhat-release ]
 
-if [[ $RH_BASED == true ]]
-then
+if [[ $RH_BASED == true ]]; then
   # Handle it this way because different distributions have different numbers of spaces,
   # So using whitespace as delimiters won't work.
   # WARNING: This will blow up if there is a '.' in the file prior to the version number.
   MAJOR_VERSION=`awk 'BEGIN { FS = "." }; {print $1}' /etc/redhat-release | awk '{print $NF}'`
-fi
+fi # end of: if [[ $RH_BASED == true ]]
 
 if [[ $MAJOR_VERSION -ge 6 && $MAJOR_VERSION -lt 7 ]]
 then
