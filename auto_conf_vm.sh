@@ -30,7 +30,18 @@ then
   yum -y install java
   yum -y install rpm
   
+  # Install open-vm-tools on a Virtual Machine
+  if dmidecode | grep -i vmware; then
+    echo "This is a VMware Virtual Machine"
+    yum -y install open-vm-tools
+    echo "open-vm-tools have been installed"
+    systemctl enable vmtoolsd.service
+    systemctl start vmtoolsd
+  fi
+  
   # Prep Elasticsearch install
+  rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+  
   cd /etc/yum.repos.d/
   elr='elasticsearch.repo'
   if [ -e $elr ]; then
@@ -46,8 +57,24 @@ then
     echo "type=rpm-md" >> $elr
     echo "Populated $elr with data" #Provide feedback
   fi  
-  rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+  
+  # Install Elasticsearch and make a copy of the original config file
   yum -y install elasticsearch
+  cd /etc/elasticsearch/
+  cp elasticsearch.yml elasticsearch.yml.backup
+  echo "The elasticsearch.yml file needs to be updated here"
+  
+  # Install Kibana and make a copy of the original config file
+  yum -y install kibana
+  cd /etc/kibana/
+  cp kibana.yml kibana.yml.backup
+  echo "The kibana.yml file needs to be updated here"
+  
+  # Install Logstash and make a copy of the original config file
+  yum -y install logstash
+  cd /etc/logstash/
+  cp logstash.yml logstash.yml.backup
+  echo "The logstash.yml file needs to be updated here"
   
   # Determine if this is CentOS 7
   CentMajor=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
