@@ -25,20 +25,16 @@ then
 elif [[ $MAJOR_VERSION -ge 7 && $MAJOR_VERSION -lt 8 ]]
 then
   echo "Do version 7 things."
-  # Install Java, wget, shasum, perl-Digest-SHA, and rpm
-  # Commenting out some installs, to see what is really needed
-  #yum -y update
+  # Install Java and rpm, assuming they are not installed (CentOS 7 minimal)
+  yum -y update # This is for the lab system only, do not use in production!
   yum -y install java
-  #yum -y install wget
-  #yum -y install shasum
-  #yum -y install perl-Digest-SHA
   yum -y install rpm
   
   # Prep Elasticsearch install
   cd /etc/yum.repos.d/
   elr='elasticsearch.repo'
   if [ -e $elr ]; then
-    echo "File $elr already exists!"
+    echo "File $elr already exists"
   else
     echo "[elasticsearch-6.x]" >> $elr
     echo "name=Elasticsearch repository for 6.x packages" >> $elr 
@@ -48,9 +44,10 @@ then
     echo "enabled=1" >> $elr 
     echo "autorefresh=1" >> $elr
     echo "type=rpm-md" >> $elr
+    echo "Populated $elr with data" #Provide feedback
   fi  
   rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
-  sudo yum install elasticsearch
+  yum -y install elasticsearch
   
   # Determine if this is CentOS 7
   CentMajor=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
@@ -58,6 +55,8 @@ else
   echo "Unhandled version $MAJOR_VERSION."
 fi
 
+# CentOS 7 minimal has the firewall enabled, we need to open default ports
+# This section is separate from the RedHat major version for this reason.
 if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]
 then
   # This needs to be updated to account for the version listed above.
