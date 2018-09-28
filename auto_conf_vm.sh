@@ -3,6 +3,16 @@
 # The TinyURL is:  https:// tinyurl [dot] com/C7VMAutoDeploy 
 # TinyURL preview is: https://preview [dot] tinyurl [dot] com/C7VMAutoDeploy
 # This script includes the commands from 'get_rh_version.sh', created by Jaydeehow (https://github.com/Jaydeehow/Bash)
+ACVversion="2018-09-28-1045"
+echo "Going home"
+cd /home/
+SCRIPTDATE=`date +"%Y%m%d-%H%M%S"`
+script "script_auto_conf_vm_$SCRIPTDATE.log"
+pwd
+whoami
+echo "Running auto_conf_vm.sh version $ACVversion"
+
+# Declare variables
 RH_BASED=false
 MAJOR_VERSION=0
 CentMajor=0
@@ -94,13 +104,16 @@ then
     echo "type=rpm-md" >> $elr
     echo "Populated $elr with data" #Provide feedback
   fi # end of: if [ -e $elr ]
+  cd /home/
   
   if [[ $installElastic == true && ! which elasticsearch ]]; then
     # Install Elasticsearch and make a copy of the original config file
     yum -y install elasticsearch
     cd /etc/elasticsearch/
     cp elasticsearch.yml elasticsearch.yml.backup
-    echo "The elasticsearch.yml file needs to be updated here"
+    echo "Elasticsearch config needs to be updated, path is /etc/elasticsearch/elasticsearch.yml"
+    systemctl enable elasticsearch.service
+    cd /home/
   fi # end of: if ! which elasticsearch
   
   if [[ $installKibana == true && ! which kibana ]]; then
@@ -108,7 +121,9 @@ then
     yum -y install kibana
     cd /etc/kibana/
     cp kibana.yml kibana.yml.backup
-    echo "The kibana.yml file needs to be updated here"
+    echo "Kibana config needs to be updated, path is /etc/kibana/kibana.yml"
+    systemctl enable kibana.service
+    cd /home/
   fi # end of: if ! which kibana
   
   if [[ $installLogstash == true && ! which logstash ]]; then
@@ -116,7 +131,9 @@ then
     yum -y install logstash
     cd /etc/logstash/
     cp logstash.yml logstash.yml.backup
-    echo "The logstash.yml file needs to be updated here"
+    echo "Logstash config needs to be updated, path is /etc/logstash/logstash.yml"
+    systemctl enable logstash.service
+    cd /home/
   fi # end of: if ! which logstash
   
   # Determine if this is CentOS 7
@@ -156,3 +173,5 @@ if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]; then
   echo "Services still need to be configured and enabled before starting"
   
 fi # end of: if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]
+
+exit # Close the script file
