@@ -6,6 +6,36 @@
 RH_BASED=false
 MAJOR_VERSION=0
 CentMajor=0
+installElastic=false
+installKibana=false
+installLogstash=false
+
+# Prompt for Elasticsearch installation
+echo "Will Elasticsearch be installed?"
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) installElastic=true; break;;
+        No ) break;;
+    esac
+done
+
+# Prompt for Kibana installation
+echo "Will Kibana be installed?"
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) installKibana=true; break;;
+        No ) break;;
+    esac
+done
+
+# Prompt for Logstash installation
+echo "Will Logstash be installed?"
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) installLogstash=true; break;;
+        No ) break;;
+    esac
+done
 
 # Tests if there is an /etc/redhat-release file.
 # This applies to distributions based on Redhat, also.
@@ -65,7 +95,7 @@ then
     echo "Populated $elr with data" #Provide feedback
   fi # end of: if [ -e $elr ]
   
-  if ! which elasticsearch; then
+  if [[ $installElastic == true && ! which elasticsearch ]]; then
     # Install Elasticsearch and make a copy of the original config file
     yum -y install elasticsearch
     cd /etc/elasticsearch/
@@ -73,7 +103,7 @@ then
     echo "The elasticsearch.yml file needs to be updated here"
   fi # end of: if ! which elasticsearch
   
-  if ! which kibana; then
+  if [[ $installKibana == true && ! which kibana ]]; then
     # Install Kibana and make a copy of the original config file
     yum -y install kibana
     cd /etc/kibana/
@@ -81,7 +111,7 @@ then
     echo "The kibana.yml file needs to be updated here"
   fi # end of: if ! which kibana
   
-  if ! which logstash; then
+  if [[ $installLogstash == true && ! which logstash ]]; then
     # Install Logstash and make a copy of the original config file
     yum -y install logstash
     cd /etc/logstash/
@@ -102,11 +132,27 @@ if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]; then
   # This needs to be updated to account for the version listed above.
   # This also needs to be moved into the section to perform version 7 actions
   echo "Performing automated system configuration for CentOS 7, assuming CentOS 7 (minimal)"
-  # open default ports for Elasticsearch
-  firewall-cmd --zone=public --add-port=9200/tcp --permanent
-  firewall-cmd --zone=public --add-port=9200/udp --permanent  
-  # open default ports for Kibana
-  firewall-cmd --zone=public --add-port=5601/tcp --permanent
-  firewall-cmd --zone=public --add-port=5601/udp --permanent
-  echo "Default ports allowed for Elasticsearch and Kibana"
+  
+  if $installElastic == true; then
+    # open default ports for Elasticsearch
+    firewall-cmd --zone=public --add-port=9200/tcp --permanent
+    firewall-cmd --zone=public --add-port=9200/udp --permanent
+    echo "Default ports opened in the public zone for Elasticsearch"
+    firewall-cmd --zone=public --add-service=Elasticsearch --permanent
+    echo "Elasticsearch service has been added to the public zone"
+    systemctl restart firewalld
+  fi # end of: if $installElastic == true
+  
+  if $installKibana == true; then
+    # open default ports for Kibana
+    firewall-cmd --zone=public --add-port=5601/tcp --permanent
+    firewall-cmd --zone=public --add-port=5601/udp --permanent
+    echo "Default ports opened in the public zone for Kibana"
+    firewall-cmd --zone=public --add-service=Kibana --permanent
+    echo "Kibana service has been added to the public zone"
+    systemctl restart firewalld
+  fi # end of: if $installKibana == true
+  
+  echo "Services still need to be configured and enabled before starting"
+  
 fi # end of: if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]
