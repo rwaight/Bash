@@ -3,7 +3,7 @@
 # The TinyURL is:  https:// tinyurl [dot] com/C7VMAutoDeploy 
 # TinyURL preview is: https://preview [dot] tinyurl [dot] com/C7VMAutoDeploy
 # This script includes the commands from 'get_rh_version.sh', created by Jaydeehow (https://github.com/Jaydeehow/Bash)
-ACVversion="2018-09-28-1045"
+ACVversion="2018-09-28-1145"
 echo "Going home"
 cd /home/
 SCRIPTDATE=`date +"%Y%m%d-%H%M%S"`
@@ -66,6 +66,9 @@ then
 elif [[ $MAJOR_VERSION -ge 7 && $MAJOR_VERSION -lt 8 ]]
 then
   echo "Do version 7 things."
+  # Make a backup of the default sshd_config
+  cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
+  
   # Update yum, this is only suggested for lab systems!!
   yum -y update # This is for the lab system only, do not use in production!
   if ! which java; then
@@ -169,6 +172,24 @@ if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]; then
     echo "Kibana service has been added to the public zone"
     systemctl restart firewalld
   fi # end of: if $installKibana == true
+  
+  # Check sshd_config
+  if which sshd; then
+    # Check PermitEmptyPasswords
+    if grep -Eq '^PermitEmptyPasswords +[yY][eE][sS]' /etc/ssh/sshd_config; then
+      echo "PermitEmptyPasswords should be set to no";
+    elif grep -Eq '^PermitEmptyPasswords +[nN][oO]' /etc/ssh/sshd_config; then
+      echo "PermitEmptyPasswords meets requirements";
+    fi
+    # Check PermitRootLogin
+    if grep -Eq '^PermitRootLogin +[yY][eE][sS]' /etc/ssh/sshd_config; then
+      echo "PermitRootLogin should be set to no";
+    elif grep -Eq '^PermitRootLogin +[nN][oO]' /etc/ssh/sshd_config; then
+      echo "PermitRootLogin meets requirements";
+    fi
+    
+    echo "sshd_config still needs to be updated before enabling and starting sshd"
+  fi # end of: if which sshd
   
   echo "Services still need to be configured and enabled before starting"
   
