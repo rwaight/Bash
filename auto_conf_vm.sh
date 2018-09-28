@@ -3,11 +3,11 @@
 # The TinyURL is:  https:// tinyurl [dot] com/C7VMAutoDeploy 
 # TinyURL preview is: https://preview [dot] tinyurl [dot] com/C7VMAutoDeploy
 # This script includes the commands from 'get_rh_version.sh', created by Jaydeehow (https://github.com/Jaydeehow/Bash)
-ACVversion="2018-09-28-1145"
+ACVversion="2018-09-28-1212"
 echo "Going home"
 cd /home/
 SCRIPTDATE=`date +"%Y%m%d-%H%M%S"`
-script "script_auto_conf_vm_$SCRIPTDATE.log"
+#script "script_auto_conf_vm_$SCRIPTDATE.log" # script was causing the script to stop
 pwd
 whoami
 echo "Running auto_conf_vm.sh version $ACVversion"
@@ -16,16 +16,28 @@ echo "Running auto_conf_vm.sh version $ACVversion"
 RH_BASED=false
 MAJOR_VERSION=0
 CentMajor=0
+configSSH=false
 installElastic=false
 installKibana=false
 installLogstash=false
+
+# Prompt for sshd configuration
+echo "Will sshd be configured?"
+select yn in "Yes" "No"; do
+    case $yn in
+        'Yes') configSSH=true; break;;
+        'No') break;;
+        *) echo "You fail"; break;;
+    esac
+done
 
 # Prompt for Elasticsearch installation
 echo "Will Elasticsearch be installed?"
 select yn in "Yes" "No"; do
     case $yn in
-        Yes ) installElastic=true; break;;
-        No ) break;;
+        'Yes') installElastic=true; break;;
+        'No') break;;
+        *) echo "You fail"; break;;
     esac
 done
 
@@ -33,8 +45,9 @@ done
 echo "Will Kibana be installed?"
 select yn in "Yes" "No"; do
     case $yn in
-        Yes ) installKibana=true; break;;
-        No ) break;;
+        'Yes') installKibana=true; break;;
+        'No') break;;
+        *) echo "You fail"; break;;
     esac
 done
 
@@ -42,8 +55,9 @@ done
 echo "Will Logstash be installed?"
 select yn in "Yes" "No"; do
     case $yn in
-        Yes ) installLogstash=true; break;;
-        No ) break;;
+        'Yes') installLogstash=true; break;;
+        'No') break;;
+        *) echo "You fail"; break;;
     esac
 done
 
@@ -66,11 +80,25 @@ then
 elif [[ $MAJOR_VERSION -ge 7 && $MAJOR_VERSION -lt 8 ]]
 then
   echo "Do version 7 things."
-  # Make a backup of the default sshd_config
-  cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
+  
+  if $configSSH == true; then
+    # Make a backup of the default sshd_config
+    cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
+  
+    SSH_Port=""
+    while [[ ! $number =~ ^[0-9]+$ ]]; do
+      echo "Please enter the port for SSH: "; read SSH_Port
+    done
+    echo "You have specified port number $SSH_Port"
+    # Create a new user, for future use
+    #echo "Please enter the new user name: "; read New_Username
+    #echo $New_Username
+    #echo "Please enter the password for $New_Username: "; read -s New_Userpass
+    #echo "Password received"
+  fi # end of: if $configSSH == true
   
   # Update yum, this is only suggested for lab systems!!
-  yum -y update # This is for the lab system only, do not use in production!
+  # yum -y update # This is for the lab system only, do not use in production!
   if ! which java; then
     # Install Java
     yum -y install java
@@ -160,7 +188,8 @@ if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]; then
     echo "Default ports opened in the public zone for Elasticsearch"
     firewall-cmd --zone=public --add-service=Elasticsearch --permanent
     echo "Elasticsearch service has been added to the public zone"
-    systemctl restart firewalld
+    #systemctl restart firewalld
+    systemctl reload firewalld
   fi # end of: if $installElastic == true
   
   if $installKibana == true; then
@@ -170,7 +199,8 @@ if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]; then
     echo "Default ports opened in the public zone for Kibana"
     firewall-cmd --zone=public --add-service=Kibana --permanent
     echo "Kibana service has been added to the public zone"
-    systemctl restart firewalld
+    #systemctl restart firewalld
+    systemctl reload firewalld
   fi # end of: if $installKibana == true
   
   # Check sshd_config
