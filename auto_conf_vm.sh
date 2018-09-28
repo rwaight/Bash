@@ -3,7 +3,7 @@
 # The TinyURL is:  https:// tinyurl [dot] com/C7VMAutoDeploy 
 # TinyURL preview is: https://preview [dot] tinyurl [dot] com/C7VMAutoDeploy
 # This script includes the commands from 'get_rh_version.sh', created by Jaydeehow (https://github.com/Jaydeehow/Bash)
-ACVversion="2018-09-28-1212"
+ACVversion="2018-09-28-1224"
 echo "Going home"
 cd /home/
 SCRIPTDATE=`date +"%Y%m%d-%H%M%S"`
@@ -27,7 +27,7 @@ select yn in "Yes" "No"; do
     case $yn in
         'Yes') configSSH=true; break;;
         'No') break;;
-        *) echo "You fail"; break;;
+        *) echo "You fail, respond to the question..";;
     esac
 done
 
@@ -37,7 +37,7 @@ select yn in "Yes" "No"; do
     case $yn in
         'Yes') installElastic=true; break;;
         'No') break;;
-        *) echo "You fail"; break;;
+        *) echo "You fail, respond to the question..";;
     esac
 done
 
@@ -47,7 +47,7 @@ select yn in "Yes" "No"; do
     case $yn in
         'Yes') installKibana=true; break;;
         'No') break;;
-        *) echo "You fail"; break;;
+        *) echo "You fail, respond to the question..";;
     esac
 done
 
@@ -57,7 +57,7 @@ select yn in "Yes" "No"; do
     case $yn in
         'Yes') installLogstash=true; break;;
         'No') break;;
-        *) echo "You fail"; break;;
+        *) echo "You fail, respond to the question..";;
     esac
 done
 
@@ -137,7 +137,7 @@ then
   fi # end of: if [ -e $elr ]
   cd /home/
   
-  if [[ $installElastic == true && ! which elasticsearch ]]; then
+  if $installElastic == true; then
     # Install Elasticsearch and make a copy of the original config file
     yum -y install elasticsearch
     cd /etc/elasticsearch/
@@ -147,7 +147,7 @@ then
     cd /home/
   fi # end of: if ! which elasticsearch
   
-  if [[ $installKibana == true && ! which kibana ]]; then
+  if $installKibana == true; then
     # Install Kibana and make a copy of the original config file
     yum -y install kibana
     cd /etc/kibana/
@@ -157,7 +157,7 @@ then
     cd /home/
   fi # end of: if ! which kibana
   
-  if [[ $installLogstash == true && ! which logstash ]]; then
+  if $installLogstash == true; then
     # Install Logstash and make a copy of the original config file
     yum -y install logstash
     cd /etc/logstash/
