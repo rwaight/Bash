@@ -86,7 +86,7 @@ then
     cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
   
     SSH_Port=""
-    while [[ ! $number =~ ^[0-9]+$ ]]; do
+    while [[ ! $SSH_Port =~ ^[0-9]+$ ]]; do
       echo "Please enter the port for SSH: "; read SSH_Port
     done
     echo "You have specified port number $SSH_Port"
