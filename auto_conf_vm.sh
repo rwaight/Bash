@@ -4,12 +4,10 @@
 # TinyURL preview is: https://preview [dot] tinyurl [dot] com/C7VMAutoDeploy
 # This script includes the commands from 'get_rh_version.sh', created by Jaydeehow (https://github.com/Jaydeehow/Bash)
 ACVversion="2018-09-28-1224"
-echo "Going home"
+#echo "Going home"
 cd /home/
 SCRIPTDATE=`date +"%Y%m%d-%H%M%S"`
 #script "script_auto_conf_vm_$SCRIPTDATE.log" # script was causing the script to stop
-pwd
-whoami
 echo "Running auto_conf_vm.sh version $ACVversion"
 
 # Declare variables
@@ -107,8 +105,8 @@ then
   # Install open-vm-tools on a Virtual Machine
   if dmidecode | grep -i vmware; then
     echo "This is a VMware Virtual Machine, checking for open-vm-tools"
-    if ! which open-vm-tools; then
-      echo "installing open-vm-tools"
+    if ! which open-vm-tools; then # which open-vm-tools does not work, find a new solution
+      #echo "installing open-vm-tools"
       yum -y install open-vm-tools
       systemctl enable vmtoolsd.service
       systemctl start vmtoolsd
@@ -137,7 +135,7 @@ then
   fi # end of: if [ -e $elr ]
   cd /home/
   
-  if $installElastic == true; then
+  if $installElastic == true; then # which elasticsearch does not work, find a new solution
     # Install Elasticsearch and make a copy of the original config file
     yum -y install elasticsearch
     cd /etc/elasticsearch/
@@ -147,7 +145,7 @@ then
     cd /home/
   fi # end of: if ! which elasticsearch
   
-  if $installKibana == true; then
+  if $installKibana == true; then # which kibana does not work, find a new solution
     # Install Kibana and make a copy of the original config file
     yum -y install kibana
     cd /etc/kibana/
@@ -157,7 +155,7 @@ then
     cd /home/
   fi # end of: if ! which kibana
   
-  if $installLogstash == true; then
+  if $installLogstash == true; then # which logstash does not work, find a new solution
     # Install Logstash and make a copy of the original config file
     yum -y install logstash
     cd /etc/logstash/
@@ -204,7 +202,7 @@ if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]; then
   fi # end of: if $installKibana == true
   
   # Check sshd_config
-  if which sshd; then
+  if $configSSH == true; then
     # Check PermitEmptyPasswords
     if grep -Eq '^PermitEmptyPasswords +[yY][eE][sS]' /etc/ssh/sshd_config; then
       echo "PermitEmptyPasswords should be set to no";
