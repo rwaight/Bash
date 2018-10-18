@@ -3,7 +3,7 @@
 # The TinyURL is:  https:// tinyurl [dot] com/C7VMAutoDeploy 
 # TinyURL preview is: https://preview [dot] tinyurl [dot] com/C7VMAutoDeploy
 # This script includes the commands from 'get_rh_version.sh', created by Jaydeehow (https://github.com/Jaydeehow/Bash)
-ACVversion="2018-10-02-1005"
+ACVversion="2018-10-18-1535"
 #echo "Going home"
 cd /home/
 SCRIPTDATE=`date +"%Y%m%d-%H%M%S"`
@@ -65,6 +65,16 @@ select yn in "Yes" "No"; do
         *) echo "You fail, respond to the question..";;
     esac
 done # end of: # Prompt for Logstash installation
+
+# Prompt for *beats installation
+echo "Will *beats be installed?"
+select yn in "Yes" "No"; do
+    case $yn in
+        'Yes') installBeats=true; break;;
+        'No') installBeats=false; break;;
+        *) echo "You fail, respond to the question..";;
+    esac
+done # end of: # Prompt for *beats installation
 
 # Tests if there is an /etc/redhat-release file.
 # This applies to distributions based on Redhat, also.
@@ -171,9 +181,9 @@ then
     cp jvm.options jvm.options.backup
     echo "Elasticsearch config needs to be updated, path is /etc/elasticsearch/elasticsearch.yml"
     echo "JVM config needs to be updated, path is /etc/elasticsearch/jvm.options"
-    systemctl enable elasticsearch.service
+    #systemctl enable elasticsearch.service # Do not automatically enable Elasticsearch
     cd /home/
-  fi # end of: if ! which elasticsearch
+  fi # end of: if $installElastic == true
   
   if $installKibana == true; then # which kibana does not work, find a new solution
     # Install Kibana and make a copy of the original config file
@@ -183,7 +193,7 @@ then
     echo "Kibana config needs to be updated, path is /etc/kibana/kibana.yml"
     # systemctl enable kibana.service # Do not automatically enable Kibana
     cd /home/
-  fi # end of: if ! which kibana
+  fi # end of: if $installKibana == true
   
   if $installLogstash == true; then # which logstash does not work, find a new solution
     # Install Logstash and make a copy of the original config file
@@ -193,28 +203,30 @@ then
     echo "Logstash config needs to be updated, path is /etc/logstash/logstash.yml"
     # systemctl enable logstash.service # Do not automatically enable Logstash
     cd /home/
-  fi # end of: if ! which logstash
+  fi # end of: if $installLogstash == true
   
-  # Install MetricBeat
-  yum -y install metricbeat
-  cd /etc/metricbeat/
-  cp metricbeat.yml metricbeat.yml.backup
-  echo "MetricBeat config needs to be updated, path is /etc/metricbeat/metricbeat.yml"
-  cd /home/
+  if $installBeats == true; then
+    # Install MetricBeat
+    yum -y install metricbeat
+    cd /etc/metricbeat/
+    cp metricbeat.yml metricbeat.yml.backup
+    echo "MetricBeat config needs to be updated, path is /etc/metricbeat/metricbeat.yml"
+    cd /home/
   
-  # Install AuditBeat
-  yum -y install auditbeat
-  cd /etc/auditbeat/
-  cp auditbeat.yml auditbeat.yml.backup
-  echo "AuditBeat config needs to be updated, path is /etc/auditbeat/auditbeat.yml"
-  cd /home/
+    # Install AuditBeat
+    yum -y install auditbeat
+    cd /etc/auditbeat/
+    cp auditbeat.yml auditbeat.yml.backup
+    echo "AuditBeat config needs to be updated, path is /etc/auditbeat/auditbeat.yml"
+    cd /home/
   
-  # Install PacketBeat
-  yum -y install packetbeat
-  cd /etc/packetbeat/
-  cp packetbeat.yml packetbeat.yml.backup
-  echo "PacketBeat config needs to be updated, path is /etc/packetbeat/packetbeat.yml"
-  cd /home/
+    # Install PacketBeat
+    yum -y install packetbeat
+    cd /etc/packetbeat/
+    cp packetbeat.yml packetbeat.yml.backup
+    echo "PacketBeat config needs to be updated, path is /etc/packetbeat/packetbeat.yml"
+    cd /home/
+  fi # end of: if $installBeats == true
   
   # Determine if this is CentOS
   CentMajor=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
@@ -234,7 +246,6 @@ if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]; then
     # open default ports for Elasticsearch
     firewall-cmd --zone=$FWZone --add-port=9200/tcp --permanent
     firewall-cmd --zone=$FWZone --add-port=9300/tcp --permanent
-    #firewall-cmd --zone=public --add-port=9200/udp --permanent # UDP not needed
     echo "Default ports opened in the $FWZone zone for Elasticsearch"
     firewall-cmd --zone=$FWZone --add-service=elasticsearch --permanent
     echo "Elasticsearch service has been added to the $FWZone zone"
@@ -245,7 +256,6 @@ if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]; then
   if $installKibana == true; then
     # open default ports for Kibana
     firewall-cmd --zone=$FWZone --add-port=5601/tcp --permanent
-    #firewall-cmd --zone=public --add-port=5601/udp --permanent # UDP not needed
     echo "Default ports opened in the $FWZone zone for Kibana"
     firewall-cmd --zone=$FWZone --add-service=kibana --permanent
     echo "Kibana service has been added to the $FWZone zone"
@@ -269,10 +279,8 @@ if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]; then
     fi
     
     echo "sshd_config still needs to be updated before enabling and starting sshd"
-  fi # end of: if which sshd
+  fi # end of: if $configSSH == true
   
   echo "Services still need to be configured and enabled before starting"
   
 fi # end of: if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]
-
-exit # Close the script file
