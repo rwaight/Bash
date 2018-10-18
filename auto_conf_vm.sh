@@ -168,7 +168,9 @@ then
     yum -y install elasticsearch
     cd /etc/elasticsearch/
     cp elasticsearch.yml elasticsearch.yml.backup
+    cp jvm.options jvm.options.backup
     echo "Elasticsearch config needs to be updated, path is /etc/elasticsearch/elasticsearch.yml"
+    echo "JVM config needs to be updated, path is /etc/elasticsearch/jvm.options"
     systemctl enable elasticsearch.service
     cd /home/
   fi # end of: if ! which elasticsearch
@@ -192,6 +194,27 @@ then
     # systemctl enable logstash.service # Do not automatically enable Logstash
     cd /home/
   fi # end of: if ! which logstash
+  
+  # Install MetricBeat
+  yum -y install metricbeat
+  cd /etc/metricbeat/
+  cp metricbeat.yml metricbeat.yml.backup
+  echo "MetricBeat config needs to be updated, path is /etc/metricbeat/metricbeat.yml"
+  cd /home/
+  
+  # Install AuditBeat
+  yum -y install auditbeat
+  cd /etc/auditbeat/
+  cp auditbeat.yml auditbeat.yml.backup
+  echo "AuditBeat config needs to be updated, path is /etc/auditbeat/auditbeat.yml"
+  cd /home/
+  
+  # Install PacketBeat
+  yum -y install packetbeat
+  cd /etc/packetbeat/
+  cp packetbeat.yml packetbeat.yml.backup
+  echo "PacketBeat config needs to be updated, path is /etc/packetbeat/packetbeat.yml"
+  cd /home/
   
   # Determine if this is CentOS
   CentMajor=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
