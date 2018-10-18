@@ -3,7 +3,7 @@
 # The TinyURL is:  https:// tinyurl [dot] com/C7VMAutoDeploy 
 # TinyURL preview is: https://preview [dot] tinyurl [dot] com/C7VMAutoDeploy
 # This script includes the commands from 'get_rh_version.sh', created by Jaydeehow (https://github.com/Jaydeehow/Bash)
-ACVversion="2018-10-18-1535"
+ACVversion="2018-10-18-1747"
 #echo "Going home"
 cd /home/
 SCRIPTDATE=`date +"%Y%m%d-%H%M%S"`
@@ -227,6 +227,30 @@ then
     echo "PacketBeat config needs to be updated, path is /etc/packetbeat/packetbeat.yml"
     cd /home/
   fi # end of: if $installBeats == true
+  
+  if $installCurator == true; then # this has not yet been asked..
+    # Prep Elasticsearch Curator install
+    cd /etc/yum.repos.d/
+    escr='curator.repo'
+    if [ -e $escr ]; then
+      echo "File $escr already exists"
+    else
+      echo "Creating file $escr and populating it with 5.x info" #Provide feedback
+      echo "[curator-5]" >> $escr
+      echo "name=CentOS/RHEL 7 repository for Elasticsearch Curator 5.x packages" >> $escr
+      echo "baseurl=https://packages.elastic.co/curator/5/centos/7" >> $escr
+      echo "gpgcheck=1" >> $escr
+      echo "gpgkey=https://packages.elastic.co/GPG-KEY-elasticsearch" >> $escr
+      echo "enabled=1" >> $escr
+      echo "Populated $escr with data" #Provide feedback
+    fi # end of: if [ -e $escr ]
+    cd /home/
+    # Install Curator
+    yum -y install elasticsearch-curator
+  
+  # end of: if $installCurator == true
+  
+  
   
   # Determine if this is CentOS
   CentMajor=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
