@@ -76,6 +76,16 @@ select yn in "Yes" "No"; do
     esac
 done # end of: # Prompt for *beats installation
 
+# Prompt for Elasticsearch-Curator installation
+echo "Will Elasticsearch-Curator be installed?"
+select yn in "Yes" "No"; do
+    case $yn in
+        'Yes') installCurator=true; break;;
+        'No') installCurator=false; break;;
+        *) echo "You fail, respond to the question..";;
+    esac
+done # end of: # Prompt for Elasticsearch-Curator installation
+
 # Tests if there is an /etc/redhat-release file.
 # This applies to distributions based on Redhat, also.
 if [ -f /etc/redhat-release ]; then
@@ -247,10 +257,7 @@ then
     cd /home/
     # Install Curator
     yum -y install elasticsearch-curator
-  
-  # end of: if $installCurator == true
-  
-  
+  fi # end of: if $installCurator == true
   
   # Determine if this is CentOS
   CentMajor=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
