@@ -3,7 +3,7 @@
 # The TinyURL is:  https:// tinyurl [dot] com/C7VMAutoDeploy 
 # TinyURL preview is: https://preview [dot] tinyurl [dot] com/C7VMAutoDeploy
 # This script includes the commands from 'get_rh_version.sh', created by Jaydeehow (https://github.com/Jaydeehow/Bash)
-ACVversion="2018-10-18-1747"
+ACVversion="2019-10-24-1904"
 #echo "Going home"
 cd /home/
 SCRIPTDATE=`date +"%Y%m%d-%H%M%S"`
@@ -129,6 +129,10 @@ then
     #echo $New_Username
     #echo "Please enter the password for $New_Username: "; read -s New_Userpass
     #echo "Password received"
+    #useradd $New_Username
+    #passwd $New_Userpass
+    # Determine if sudo access is needed via wheel
+    #usermod -aG wheel $New_Username
     
     # Prompt for trusted source
     echo "Do you want to add a trusted source to the firewall zone?"
@@ -170,10 +174,10 @@ then
   if [ -e $elr ]; then
     echo "File $elr already exists"
   else
-    echo "Creating file $elr and populating it with 6.x info" #Provide feedback
-    echo "[elasticsearch-6.x]" >> $elr
-    echo "name=Elasticsearch repository for 6.x packages" >> $elr 
-    echo "baseurl=https://artifacts.elastic.co/packages/6.x/yum" >> $elr
+    echo "Creating file $elr and populating it with 7.x info" #Provide feedback
+    echo "[elasticsearch-7.x]" >> $elr
+    echo "name=Elasticsearch repository for 7.x packages" >> $elr 
+    echo "baseurl=https://artifacts.elastic.co/packages/7.x/yum" >> $elr
     echo "gpgcheck=1" >> $elr
     echo "gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch" >> $elr
     echo "enabled=1" >> $elr 
@@ -312,6 +316,7 @@ if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]; then
     echo "sshd_config still needs to be updated before enabling and starting sshd"
   fi # end of: if $configSSH == true
   
+  echo "Don't forget to configure sudo access"
   echo "Services still need to be configured and enabled before starting"
   
 fi # end of: if [[ $CentMajor -ge 7 && $CentMajor -lt 8 ]]
